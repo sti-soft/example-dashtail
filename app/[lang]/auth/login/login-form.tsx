@@ -20,6 +20,8 @@ import Image from "next/image";
 import GithubIcon from "@/public/images/auth/github.png";
 import facebook from "@/public/images/auth/facebook.png";
 import twitter from "@/public/images/auth/twitter.png";
+import {useAuthStore} from "@/store";
+import toast from "react-hot-toast";
 
 const schema = z.object({
     email: z.string().email({ message: "Your email is invalid." }),
@@ -29,6 +31,9 @@ const schema = z.object({
 const LoginForm = () => {
     const [isPending, startTransition] = React.useTransition();
     const [passwordType, setPasswordType] = React.useState("password");
+
+    const loginUser = useAuthStore((state) => state.loginUser);
+
     const isDesktop2xl = useMediaQuery("(max-width: 1530px)");
 
     const togglePasswordType = () => {
@@ -47,15 +52,24 @@ const LoginForm = () => {
         resolver: zodResolver(schema),
         mode: "all",
         defaultValues: {
-            email: "dashtail@codeshaper.net",
-            password: "password",
+            email: "william.fernandez@gmail.com",
+            password: "123456",
         },
     });
     const [isVisible, setIsVisible] = React.useState(false);
     const toggleVisibility = () => setIsVisible(!isVisible);
 
     const onSubmit = (data: any) => {
-        console.log(data);
+        startTransition(async() => {
+            try {
+                await loginUser(data.email, data.password);
+                toast.success("Login successful");
+                window.location.assign("/dashboard");
+                reset();
+            } catch (error) {
+                toast.error("Credenciales incorrectas");
+            }
+        });
     }
 
     return (

@@ -1,6 +1,8 @@
-import { create } from 'zustand'
+import {create, StateCreator} from 'zustand'
 import { siteConfig } from "@/config/site";
-import { persist, createJSONStorage } from "zustand/middleware";
+import {persist, createJSONStorage, devtools} from "zustand/middleware";
+import { AuthState } from "@/interfaces";
+import {AuthService} from "@/services/auth.services";
 
 interface ThemeStoreState {
   theme: string;
@@ -96,3 +98,36 @@ export const useSidebar = create<SidebarState>()(
       storage: createJSONStorage(() => localStorage), },
     ),
 )
+
+const storeApi: StateCreator<AuthState> = set => ({
+    status: "unauthorized",
+    token: undefined,
+    user: undefined,
+
+    loginUser: async (email: string, password: string) => {
+        try {
+            const { token, User } = await AuthService.login(email, password)
+            set({ status: "authorized", token, user: User })
+        } catch (error) {
+            set({ status: 'unauthorized', token: undefined, user: undefined })
+
+            throw new Error('No autorizado')
+        }
+    },
+
+    checkAuthStatus: async () => {
+        try {
+            const { token, User } = await AuthService.checkStatus()
+            set({ status: 'authorized', token, user: User })
+        } catch (error) {
+            set({ status: 'unauthorized', token: undefined, user: undefined })
+
+            throw new Error('No autorizado')
+        }
+    },
+
+    logoutUser: () => {
+        set({ status: 'unauthorized', token: undefined, user: undefined })
+    }
+})
+export const useAuthStore = create<AuthState>()(devtools(persist(storeApi, { name: 'auth-storage' })))
