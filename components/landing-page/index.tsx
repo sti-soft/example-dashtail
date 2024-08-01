@@ -4,7 +4,6 @@ import ShowCase from "./showcase";
 import Hero from "./hero";
 import ColorSchemas from "./color-schemas";
 import ProjectTools from "./project-tools";
-import AllComponents from "./all-components";
 import FigmaKit from "./figma-kit";
 import CustomProject from "./custom-project";
 import { useMounted } from "@/hooks/use-mounted";
@@ -26,7 +25,6 @@ const LandingPageView = () => {
       <Header />
       <Hero />
       <Stats />
-      <AllComponents />
       <ShowCase />
       <ColorSchemas />
       <ProjectTools />
